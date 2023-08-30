@@ -120,22 +120,22 @@ func (yd YDApi) GetResourceMeta(path string) (Resource, error) {
 	return metaResource, nil
 }
 
-func (yd YDApi) operationStatus(operationID string) (string, error) {
+func (yd YDApi) OperationStatus(operationID string) (string, error) {
 	OperationStatus := struct {
 		Status string `json:"status"`
 	}{}
 	yd.Method = http.MethodGet
 	errUrl := yd.setUrl(YandexDiskApiEndpoint + "/v1/disk/operations/" + operationID)
 	if errUrl != nil {
-		return "", buildError("operationStatus", "fail set url", errUrl)
+		return "", buildError("OperationStatus", "fail set url", errUrl)
 	}
 	rawResp, errResp := yd.getResponseBodyBytes()
 	if errResp != nil {
-		return "", buildError("operationStatus", "fail request", errResp)
+		return "", buildError("OperationStatus", "fail request", errResp)
 	}
 	err := json.Unmarshal(rawResp, &OperationStatus)
 	if err != nil {
-		return "", buildError("operationStatus", "fail Unmarshal", err)
+		return "", buildError("OperationStatus", "fail Unmarshal", err)
 	}
 	return OperationStatus.Status, nil
 }
@@ -159,7 +159,6 @@ func (yd YDApi) uploadFileOperation(path string, operation Operation) error {
 }
 
 func (yd YDApi) Upload(pathLocal string, pathCloud string, overwrite bool) (string, error) {
-	StatusReturn := ""
 	yd.Method = http.MethodGet
 	errUrl := yd.setUrl(YandexDiskApiEndpoint + "/v1/disk/resources/upload?path=" + pathCloud + "&overwrite=" + fmt.Sprintf("%t", overwrite))
 	if errUrl != nil {
@@ -179,15 +178,11 @@ func (yd YDApi) Upload(pathLocal string, pathCloud string, overwrite bool) (stri
 		if err != nil {
 			return "", buildError("Upload", "fail do upload operation", err)
 		}
-		StatusReturn, err = yd.operationStatus(operationUpload.OperationId)
-		if err != nil {
-			return "", buildError("Upload", "fail get opetaion status", err)
-		}
 	} else {
 		// todo: add check template
 		return "", buildError("Download", "operation.Template = true", nil)
 	}
-	return StatusReturn, nil
+	return operationUpload.OperationId, nil
 }
 
 func (yd YDApi) downloadFileOperation(operation Operation) ([]byte, error) {

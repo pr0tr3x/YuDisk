@@ -37,15 +37,15 @@ if err != nil {
 ## `Upload(pathLocal string, pathCloud string, overwrite bool) (string, error)`
 ***
 
-Loads the `pathLocal` file to the disk on the path `pathCloud`. Overwrites it if `overwrite` is true. Return `success` string
+Loads the `pathLocal` file to the disk on the path `pathCloud`. Overwrites it if `overwrite` is true.  Returns id async operation.
 
 ### Example:
 ```go
-status, err := yd.Upload("./YuDisk.png", "app:/YuDisk.png", true)
+operational_id, err := yd.Upload("./YuDisk.png", "app:/YuDisk.png", true)
 if err != nil {
     fmt.Printf("%+v\n", err)
 } else {
-    fmt.Printf("%+v\n", status)
+    fmt.Printf("%+v\n", operational_id)
 }
 ```
 
@@ -108,7 +108,23 @@ fmt.Printf("%+v\n", err)
 }
 ```
 
+## `OperationStatus(operationID string) (string, error)`
+***
+
+Gets the status of an asynchronous operation. Returns `success` string if operation completed.
+
+### Example:
+```go
+status, err := yd.OperationStatus(status)
+if err != nil {
+    fmt.Printf("%+v\n", err)
+} else {
+    fmt.Printf("%+v\n", status)
+}
+```
+
 ## `SetUserAgent(agent string)`
+***
 
 Sets new user agent string.
 
@@ -118,6 +134,7 @@ yd.SetUserAgent("New_Agent")
 ```
 
 ## `SetProxy(proxyUrl string) error`
+***
 
 Sets proxy url for all requests.
 
