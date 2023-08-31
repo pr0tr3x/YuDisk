@@ -8,7 +8,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 )
 
 type ydError struct {
@@ -140,11 +139,7 @@ func (yd YDApi) OperationStatus(operationID string) (string, error) {
 	return OperationStatus.Status, nil
 }
 
-func (yd YDApi) uploadFileOperation(path string, operation Operation) error {
-	raw, err := os.ReadFile(path)
-	if err != nil {
-		return buildError("uploadFileOperation", "fail read file", err)
-	}
+func (yd YDApi) uploadFileOperation(raw []byte, operation Operation) error {
 	uploadRequest, errRequest := http.NewRequest(operation.Method, operation.Href, bytes.NewBuffer(raw))
 	if errRequest != nil {
 		return buildError("uploadFileOperation", "fail build new request", errRequest)
@@ -153,12 +148,12 @@ func (yd YDApi) uploadFileOperation(path string, operation Operation) error {
 	yd.Request = uploadRequest
 	_, errResp := yd.getResponseBodyBytes()
 	if errResp != nil {
-		return buildError("uploadFileOperation", "fail request", err)
+		return buildError("uploadFileOperation", "fail request", errResp)
 	}
 	return nil
 }
 
-func (yd YDApi) Upload(pathLocal string, pathCloud string, overwrite bool) (string, error) {
+func (yd YDApi) Upload(rawContent []byte, pathCloud string, overwrite bool) (string, error) {
 	yd.Method = http.MethodGet
 	errUrl := yd.setUrl(YandexDiskApiEndpoint + "/v1/disk/resources/upload?path=" + pathCloud + "&overwrite=" + fmt.Sprintf("%t", overwrite))
 	if errUrl != nil {
@@ -174,7 +169,7 @@ func (yd YDApi) Upload(pathLocal string, pathCloud string, overwrite bool) (stri
 		return "", buildError("Upload", "fail Unmarshal", err)
 	}
 	if !operationUpload.Templated {
-		err := yd.uploadFileOperation(pathLocal, operationUpload)
+		err := yd.uploadFileOperation(rawContent, operationUpload)
 		if err != nil {
 			return "", buildError("Upload", "fail do upload operation", err)
 		}

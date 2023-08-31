@@ -34,18 +34,19 @@ if err != nil {
 }
 ```
 
-## `Upload(pathLocal string, pathCloud string, overwrite bool) (string, error)`
+## `Upload(rawContent []byte, pathCloud string, overwrite bool) (string, error)`
 ***
 
-Loads the `pathLocal` file to the disk on the path `pathCloud`. Overwrites it if `overwrite` is true.  Returns id async operation.
+Loads bytes array to the disk on the path `path Cloud`. Overwrites it if `overwrite` is true.  Returns id async operation.
 
 ### Example:
 ```go
-operational_id, err := yd.Upload("./YuDisk.png", "app:/YuDisk.png", true)
+raw, _ := os.ReadFile(".YuDisk.png")
+status, err := yd.Upload(raw, "app:/YuDisk.png", true)
 if err != nil {
-    fmt.Printf("%+v\n", err)
+fmt.Printf("%+v\n", err)
 } else {
-    fmt.Printf("%+v\n", operational_id)
+fmt.Printf("%+v\n", status)
 }
 ```
 
